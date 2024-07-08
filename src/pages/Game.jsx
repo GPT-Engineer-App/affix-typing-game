@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { io } from "socket.io-client";
 
 const Game = () => {
@@ -63,54 +65,93 @@ const Game = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Word Affix Challenge</CardTitle>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <Card className="mb-8 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          <CardTitle className="text-3xl font-bold">Word Affix Challenge</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold mb-4">Current Affix: {affix}</div>
-          <div className="mb-4">
+        <CardContent className="p-6">
+          <div className="text-3xl font-bold mb-6 text-center text-purple-700">Current Affix: {affix}</div>
+          <div className="mb-6">
             <Input
               type="text"
               placeholder={isMyTurn ? "Type your word here" : "Waiting for opponent..."}
               value={isMyTurn ? inputWord : opponentTyping}
               onChange={handleInputChange}
               disabled={!isMyTurn}
+              className="text-lg"
             />
           </div>
-          <Button onClick={handleSubmit} disabled={!isMyTurn}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={!isMyTurn}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+          >
             Submit Word
           </Button>
         </CardContent>
       </Card>
 
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle>Game Info</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-2">Time Remaining: {timer} seconds</div>
-          <Progress value={(timer / 30) * 100} className="mb-4" />
-          <div>Your Score: {score}</div>
-          <div>Lives Remaining: {lives}</div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Players</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {players.map((player, index) => (
-            <div key={index} className="mb-2">
-              {player.name}: {player.score} points
-              {player.id === socket?.id && " (You)"}
-              {player.id === currentTypingPlayer && " - Currently Typing"}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-gray-800">Game Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <div className="text-sm font-medium text-gray-500 mb-1">Time Remaining</div>
+              <div className="flex items-center">
+                <Progress value={(timer / 30) * 100} className="flex-grow mr-2" />
+                <span className="text-lg font-bold">{timer}s</span>
+              </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <div className="text-sm font-medium text-gray-500">Your Score</div>
+                <div className="text-2xl font-bold text-purple-600">{score}</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-500">Lives</div>
+                <div className="flex">
+                  {[...Array(lives)].map((_, i) => (
+                    <span key={i} className="text-red-500 text-2xl mr-1">❤️</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-gray-800">Players</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {players.map((player, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Avatar className="h-10 w-10 mr-3">
+                      <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${player.name}`} />
+                      <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{player.name}</div>
+                      <div className="text-sm text-gray-500">{player.score} points</div>
+                    </div>
+                  </div>
+                  {player.id === socket?.id && (
+                    <Badge variant="secondary">You</Badge>
+                  )}
+                  {player.id === currentTypingPlayer && (
+                    <Badge variant="outline" className="animate-pulse">Typing</Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
