@@ -14,6 +14,8 @@ const Game = () => {
   const [lives, setLives] = useState(3);
   const [players, setPlayers] = useState([]);
   const [isMyTurn, setIsMyTurn] = useState(false);
+  const [currentTypingPlayer, setCurrentTypingPlayer] = useState(null);
+  const [opponentTyping, setOpponentTyping] = useState("");
 
   useEffect(() => {
     const newSocket = io("http://localhost:3000"); // Replace with your server URL
@@ -24,6 +26,7 @@ const Game = () => {
       setTimer(gameState.timeRemaining);
       setPlayers(gameState.players);
       setIsMyTurn(gameState.currentPlayer === newSocket.id);
+      setCurrentTypingPlayer(gameState.currentPlayer);
     });
 
     newSocket.on("turnResult", (result) => {
@@ -34,13 +37,28 @@ const Game = () => {
       }
     });
 
+    newSocket.on("opponentTyping", (data) => {
+      if (data.playerId !== newSocket.id) {
+        setOpponentTyping(data.input);
+      }
+    });
+
     return () => newSocket.close();
   }, []);
+
+  const handleInputChange = (e) => {
+    const newInput = e.target.value;
+    setInputWord(newInput);
+    if (socket && isMyTurn) {
+      socket.emit("playerTyping", { input: newInput });
+    }
+  };
 
   const handleSubmit = () => {
     if (socket && isMyTurn) {
       socket.emit("submitWord", inputWord);
       setInputWord("");
+      setOpponentTyping("");
     }
   };
 
@@ -55,9 +73,9 @@ const Game = () => {
           <div className="mb-4">
             <Input
               type="text"
-              placeholder="Type your word here"
-              value={inputWord}
-              onChange={(e) => setInputWord(e.target.value)}
+              placeholder={isMyTurn ? "Type your word here" : "Waiting for opponent..."}
+              value={isMyTurn ? inputWord : opponentTyping}
+              onChange={handleInputChange}
               disabled={!isMyTurn}
             />
           </div>
@@ -88,7 +106,7 @@ const Game = () => {
             <div key={index} className="mb-2">
               {player.name}: {player.score} points
               {player.id === socket?.id && " (You)"}
-              {isMyTurn && player.id === socket?.id && " - Your Turn!"}
+              {player.id === currentTypingPlayer && " - Currently Typing"}
             </div>
           ))}
         </CardContent>
