@@ -97,18 +97,36 @@ const Game = () => {
               Current Affix: {affix}
             </motion.div>
             <div className="mb-6 relative">
-              <Input
-                type="text"
-                placeholder={isMyTurn ? "Type your word here" : "Waiting for opponent..."}
-                value={isMyTurn ? inputWord : opponentTyping}
-                onChange={handleInputChange}
-                disabled={!isMyTurn}
-                className="text-lg bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white placeholder-white/70 rounded-full px-6 py-4"
-              />
+              <motion.div
+                className="w-full h-48 bg-gray-800 rounded-full relative overflow-hidden"
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
+              >
+                <motion.div
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5/6 h-5/6 bg-gray-700 rounded-full"
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Input
+                    type="text"
+                    placeholder={isMyTurn ? "Type your word here" : "Waiting for opponent..."}
+                    value={isMyTurn ? inputWord : opponentTyping}
+                    onChange={handleInputChange}
+                    disabled={!isMyTurn}
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5/6 text-lg bg-transparent border-2 border-white/50 text-white placeholder-white/70 rounded-full px-6 py-4 text-center"
+                  />
+                </motion.div>
+                <motion.div
+                  className="absolute top-0 right-0 w-8 h-8 bg-red-500 rounded-full"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+              </motion.div>
               <AnimatePresence>
                 {isMyTurn && (
                   <motion.div
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
+                    className="absolute bottom-2 right-2 flex items-center pr-3 pointer-events-none"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 20 }}
