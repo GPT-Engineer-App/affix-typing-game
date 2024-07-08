@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { io } from "socket.io-client";
+import { motion } from "framer-motion";
 
 const Game = () => {
   const [socket, setSocket] = useState(null);
@@ -66,26 +67,43 @@ const Game = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <Card className="mb-8 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-          <CardTitle className="text-3xl font-bold">Word Affix Challenge</CardTitle>
+      <Card className="mb-8 shadow-lg bg-gradient-to-br from-purple-400 to-pink-500 text-white">
+        <CardHeader className="text-center">
+          <CardTitle className="text-4xl font-bold">Word Affix Challenge</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div className="text-3xl font-bold mb-6 text-center text-purple-700">Current Affix: {affix}</div>
-          <div className="mb-6">
+          <motion.div
+            className="text-5xl font-bold mb-6 text-center"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            Current Affix: {affix}
+          </motion.div>
+          <div className="mb-6 relative">
             <Input
               type="text"
               placeholder={isMyTurn ? "Type your word here" : "Waiting for opponent..."}
               value={isMyTurn ? inputWord : opponentTyping}
               onChange={handleInputChange}
               disabled={!isMyTurn}
-              className="text-lg"
+              className="text-lg bg-white/20 backdrop-blur-sm border-2 border-white/50 text-white placeholder-white/70 rounded-full px-6 py-4"
             />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              {isMyTurn && (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                >
+                  🎮
+                </motion.div>
+              )}
+            </div>
           </div>
           <Button 
             onClick={handleSubmit} 
             disabled={!isMyTurn}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-purple-900 font-bold py-3 rounded-full text-lg transform transition hover:scale-105"
           >
             Submit Word
           </Button>
@@ -93,28 +111,35 @@ const Game = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <Card className="shadow-md">
+        <Card className="shadow-md bg-gradient-to-br from-blue-400 to-cyan-300 text-white">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-gray-800">Game Info</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Game Info</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="mb-4">
-              <div className="text-sm font-medium text-gray-500 mb-1">Time Remaining</div>
+              <div className="text-sm font-medium mb-1">Time Remaining</div>
               <div className="flex items-center">
-                <Progress value={(timer / 30) * 100} className="flex-grow mr-2" />
-                <span className="text-lg font-bold">{timer}s</span>
+                <Progress value={(timer / 30) * 100} className="flex-grow mr-2 h-4 bg-blue-200" />
+                <span className="text-2xl font-bold">{timer}s</span>
               </div>
             </div>
             <div className="flex justify-between items-center mb-4">
               <div>
-                <div className="text-sm font-medium text-gray-500">Your Score</div>
-                <div className="text-2xl font-bold text-purple-600">{score}</div>
+                <div className="text-sm font-medium">Your Score</div>
+                <div className="text-3xl font-bold">{score}</div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-500">Lives</div>
+                <div className="text-sm font-medium">Lives</div>
                 <div className="flex">
                   {[...Array(lives)].map((_, i) => (
-                    <span key={i} className="text-red-500 text-2xl mr-1">❤️</span>
+                    <motion.span
+                      key={i}
+                      className="text-3xl mr-1"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                    >
+                      ❤️
+                    </motion.span>
                   ))}
                 </div>
               </div>
@@ -122,31 +147,37 @@ const Game = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
+        <Card className="shadow-md bg-gradient-to-br from-green-400 to-teal-300 text-white">
           <CardHeader>
-            <CardTitle className="text-2xl font-semibold text-gray-800">Players</CardTitle>
+            <CardTitle className="text-2xl font-semibold">Players</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {players.map((player, index) => (
-                <div key={index} className="flex items-center justify-between">
+                <motion.div
+                  key={index}
+                  className="flex items-center justify-between bg-white/20 backdrop-blur-sm rounded-lg p-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
                   <div className="flex items-center">
-                    <Avatar className="h-10 w-10 mr-3">
-                      <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${player.name}`} />
+                    <Avatar className="h-12 w-12 mr-3 border-2 border-white">
+                      <AvatarImage src={`https://api.dicebear.com/6.x/pixel-art/svg?seed=${player.name}`} />
                       <AvatarFallback>{player.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <div className="font-medium">{player.name}</div>
-                      <div className="text-sm text-gray-500">{player.score} points</div>
+                      <div className="font-medium text-lg">{player.name}</div>
+                      <div className="text-sm">{player.score} points</div>
                     </div>
                   </div>
                   {player.id === socket?.id && (
-                    <Badge variant="secondary">You</Badge>
+                    <Badge variant="secondary" className="bg-yellow-300 text-purple-900">You</Badge>
                   )}
                   {player.id === currentTypingPlayer && (
-                    <Badge variant="outline" className="animate-pulse">Typing</Badge>
+                    <Badge variant="outline" className="animate-pulse border-white text-white">Typing</Badge>
                   )}
-                </div>
+                </motion.div>
               ))}
             </div>
           </CardContent>
